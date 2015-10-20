@@ -315,8 +315,51 @@ var run = function () {
 						</pre>
 					</section>
 
+					<section data-markdown>
+						## Easing Functions
+
+						* Ease In
+						```javascript                
+						Math.pow(percentChange,3)
+						```
+						* Ease Out
+						```
+						(1-Math.pow(1 - (t/d)),3)
+						```
+						* Sine
+						```
+						Math.sin(t/d * Math.PI / 2))
+						```
+						* Elasticity
+						```
+						k * k * ((s+1 * k - s))
+						```
+
+						Note:
+						- EaseIn/Out power functions
+						- Sine function
+						- Elasticity
+						- Available online
+					</section>
+
+					<section data-markdown>
+						## Tools
+
+						* Prototyping
+							* Keynote, InVision, Adobe Edge...
+						* Animations
+							* framer.js, tween.js, move.js ...
+					</section>
+
 					<section>
-						blabla
+						<img src="imgs/150rule.png" alt="150 rule">
+						<p><a href="bit.ly/blink-midnight-train">bit.ly/blink-midnight-train</a></p>
+
+						<aside class="notes">
+							<ul>
+								<li>Whatever takes longer than 150ms makes the user distrust the content</li>
+							</ul>
+						</aside>
 					</section>
 
 				</section>
