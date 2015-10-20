@@ -223,6 +223,104 @@
 						</script>
 					</section>
 				</section>
+
+
+				<!--DAVID'S PART -->
+
+
+				<section>
+					<section data-markdown>
+						## [Algorithms for Animation - Simple formulas to activate your UI](https://www.youtube.com/watch?v=2UTvELjqmb0)
+						Courtney Hemphill
+					</section>
+
+					<section>
+						<h1>Psychology</h1>
+					</section>
+
+					<section data-markdown>
+						* Everybody has eye for design
+						* Movement creates life
+						* Motion vs color
+							* Our eyes detect motion easily - innate, danger recognition
+							* Color not so much
+						
+						Note:
+						- Design? everybody can design something
+						- Motion detection? tiger in a bush example
+					</section>
+
+					<section data-markdown>
+						## Animation
+						* Motion
+						* Emotion
+						* Powerful Tool
+
+						Note:
+						- Motion creates emotion
+						- Emotion can be used as a tool
+					</section>
+
+					<section>
+						<h3>Animation can be used as a cognitive aid</h3>
+						<br>
+						<p class="fragment">For example reducing explanatory text by an animation</p>
+
+						<aside class="notes">
+							For example trash bin animation
+						</aside>
+					</section>
+
+					<section>
+						<h2>Abstractions</h2>
+						<img src="imgs/CLI-GUI-NUI.png" alt="CLI-GUI-NUI">
+
+						<aside class="notes">
+							Animations are part of those abstractions
+							from gui to nui
+						</aside>
+					</section>
+
+					<section>
+						<h1>Basics</h1>
+					</section>
+
+					<section data-markdown>
+						## Interpolations
+
+						$$valueAtTime = {(end - start) \times time \over duration + start}$$
+
+						* But that is a linear momevent - feels artificial
+						* Natural = torque, drag, spin, friction ...
+						* How is that achieved?
+					</section>
+
+					<section>
+						<h2>Easing functions</h2>
+
+						$$valueAtTime = {(end - start) \times easingFunction([0-1]) + start}$$
+						<br>
+						<p>Change in <span style="color: red">property</span> property times (some float) 
+						plus <span style="color: red">beginning value</span></p>
+						
+						<pre>
+							<code data-trim>
+var run = function () {
+	time = new Date().getTime() - startTime;
+	div.style.left=(endX - startX) *
+	easingFunction([0-1]) + startX+"px";
+	if(time / duration < 1 ) requestAnimationFrame(run);
+}
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						blabla
+					</section>
+
+				</section>
+
 			</div>
 
 		</div>
@@ -245,8 +343,8 @@
 				// The "normal" size of the presentation, aspect ratio will be preserved
 			    // when the presentation is scaled to fit different resolutions. Can be
 			    // specified using percentage units.
-			    width: 960,
-			    height: 900,
+			    // width: 960,
+			    // height: 900,
 
 			    // Factor of the display size that should remain empty around the content
 			    margin: 0.1,
@@ -255,6 +353,11 @@
 			    minScale: 0.2,
 			    maxScale: 1.5,
 
+			    math: {
+        		mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js',
+        		config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+    			},
+
 				// Optional reveal.js plugins
 				dependencies: [
 				{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
@@ -262,7 +365,8 @@
 				{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 				{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
 				{ src: 'plugin/zoom-js/zoom.js', async: true },
-				{ src: 'plugin/notes/notes.js', async: true }
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/math/math.js', async: true }
 				]
 			});
 
