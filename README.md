@@ -5,13 +5,13 @@ Relies on [reveal.js](https://github.com/hakimel/reveal.js/)
 
 To view the presentation, simply open `index.html` in the browser. For full presentation functionality, proceed with following:
 
-1. Install dependencies
+* Install dependencies
 
 ```
 npm install
 ```
 
-2. Start the presentation
+* Start the presentation
 
 ```
 grunt serve
