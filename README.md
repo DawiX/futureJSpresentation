@@ -5,8 +5,16 @@ Relies on [https://github.com/hakimel/reveal.js/](reveal.js)
 
 Install dependencies
 
-$ npm install
+
+```
+#!python
+npm install
+```
 
 Start the presentation
 
-$ grunt serve
+```
+#!python
+
+grunt serve
+```
