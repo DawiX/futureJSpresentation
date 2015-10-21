@@ -1,16 +1,17 @@
 ## David Pech, Lukas Dopan
 Presentation about FutureJS conference in Barcelona 4-5 September 2015
 
-Relies on [https://github.com/hakimel/reveal.js/](reveal.js)
+Relies on [reveal.js](https://github.com/hakimel/reveal.js/)
 
-Install dependencies
+To view the presentation, simply open `index.html` in the browser. For full presentation functionality, proceed with following:
 
+1. Install dependencies
 
 ```
 npm install
 ```
 
-Start the presentation
+2. Start the presentation
 
 ```
 grunt serve
