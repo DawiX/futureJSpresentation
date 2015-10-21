@@ -431,6 +431,355 @@ var run = function () {
 
 				</section>
 
+
+				<section>
+					<section data-markdown>
+						<script type="text/template">
+							## [TRANSDUCERS FTW!](https://www.youtube.com/watch?v=327-43fmOws)
+
+							Massimiliano Mantione
+						</script>
+
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							* Clojure -> Javascript(Rambda...) -> push-pull duality task
+
+							* Composable algorithmic transformations
+
+							* Decoupled from input/output
+
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							### Parts
+
+							* A stepper function
+
+							* Transformer object
+
+							* The reduce transformation
+
+							=Transducer
+
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							### Stepper
+
+							* Stepper<I,E> :: (I, E) -> I
+
+							* A function that takes an initial value and an element
+
+							* Returns a new value for initial item
+
+							* Typical argument of reduce
+
+						</script>
+					</section>
+					<section>
+						<pre>
+							<code data-trim>
+//Stepper
+sum = function(result, item) {
+	return result + item;
+};
+
+mult = function(result, item) {
+	return result * item;
+};
+
+var input = [2,3,4];
+
+// 10 (=1+2+3+4)
+result = input.reduce(sum, 1);
+
+//24 (=1*2*3*4)
+result = input.reduce(mult, 1);
+							</code>
+						</pre>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							### Transformer
+
+							* Three functions, like generalized stepper (with begin and completition handlers)
+
+							* Returns a new value for initial item
+
+							* Typical argument of reduce
+
+						</script>
+					</section>
+					<section>
+						<pre>
+							<code data-trim>
+Transformer<I,E,R> :: {
+	init :: () -> I // initial value
+	step :: Stepper<I,E> //transformation
+	result :: I -> R //build the result
+}
+							</code>
+						</pre>
+						result takes last computed value and applies final transformation you want
+					</section>
+					<section>
+						<pre>
+							<code data-trim>
+//Transformer
+var one = function() {return 1;};
+var identity = function(result) {return result;};
+
+transformer = function(init, stepper, result) {
+	return {
+		//start with init value
+		init: init,
+
+		//Input one item at a time,
+		//passing each result to next iteration
+		//using reducing function
+		stepper: stepper
+
+		//Output last computed result
+		result: result || identity
+	}
+};
+
+input = [2, 3, 4];
+
+xf = transformer(one, sum);
+output = input.reduce(xf.step, xf.init());
+//output = 10 (=1+2+3+4)
+
+xf = transformer(one, mult);
+output = input.reduce(xf.step, xf.init());
+//output = 24 (=1*2*3*4)
+							</code>
+						</pre>
+						result takes last computed value and applies final transformation you want
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							### Reduce
+
+							*  Reduce transformation takes
+							* transformer or stepper (deal both)
+							* inital value
+							* input sequence
+							* Returns result
+
+						</script>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							<pre>
+							<code data-trim>
+TransformerOrStepper :: Transformer | Stepper
+reduce :: (
+TransformerOrStepper 	//transformation
+I 				   	    //initial value
+Iterator				//input sequence
+) -> R 						//result
+							</code>
+						</pre>
+						</script>
+					</section>
+
+					<section>
+						<pre>
+							<code data-trim>
+//Reduce
+wrap = function(stepperOrTransformer) {
+	if (typeof stepperOtTransformer === 'function') {
+		//it was stepper -> return transformer
+		return transformer (
+			//doesn't support initialization -> reduce will provide init value
+			function() {
+				throw new Error('init not supported');
+			},
+
+			//step: (stepper, function)
+			stepperOrTransformer
+
+			//result: (compute final result)
+			identity
+		);
+	} else {
+		//transformer -> just return it
+		return stepperOrTransformer;
+	}
+};
+
+//(we expect input to support the reduce method..arrays do)
+reduce = function(xf, init, input) {
+	xf = wrap(xf);
+	var result = input.reduce(xf.step, init);
+	return xf.result(result);
+}
+
+//now reduce also accepts reducing function or transformer
+input = [2,3,4];
+output = reduce(sum, 1, input); //10(=1+2+3+4)
+output = reduce(mult, 1, input); //24(=1*2*3*4)
+output = reduce(wrap(sum), 1, input); //10(=1+2+3+4)
+output = reduce(wrap(mult), 1, input); //24(=1*2*3*4)
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						<pre>
+							<code data-trim>
+//Reduce can also copy from array to another
+append = function(result, item) {
+	result.push(item);
+	return result;
+};
+
+output = reduce(append, [], input); //[2, 3, 4]
+							</code>
+						</pre>
+						reduce is the most general transformation that can exists
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							### Transducer
+
+							* Function that transforms transformer into another transformer
+
+							* (transformation of reducer)
+						</script>
+					</section>
+
+					<section>
+						<pre>
+							<code data-trim>
+Transducer :: TransformerOrStepper -> Transformer
+
+transduce:: (
+Transducer 	//transformation
+Stepper 	    //result builder
+I?			//init value
+Iterator	//intput sequence
+) -> R 			//result
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						<pre>
+							<code data-trim>
+//Transducer (takes 1 and combine it with append stepper)
+plus1 = function(item) {
+	return item + 1;
+};
+
+//out 1st transformer (it adds 1)
+transducerPlus1 = function(xf) {
+	return transformer(
+		//init
+		function() {
+			return xf.init();
+		},
+		//step
+		function(result, item) {
+			var plus1ed = plus1(item);
+			return xf.step(result, plus1ed);
+		},
+		//result
+		function(result) {
+			return xf.result(result);
+		}
+	);
+};
+
+xf = transducerPlus1(wrap(append));
+
+//input [2,3,4]
+result = xf.step([], 2); //[3] (append([], 2+1))
+result = xf.step(result, 3) //[3,4] (=append([3], 3+1))
+result = xf.step(result, 4); //[3,4,5]
+output = xf.result(result);
+
+xf = transducerPlus1(wrap(sum));
+result = xf.step(0,2) //3(=sum(0, 2+1))
+result = xf.step(result, 3) //7
+result = xf.step(result, 4) //12
+output = xf.result(result);
+							</code>
+						</pre>
+					</section>
+
+					<section data-markdown>
+						<script type="text/template">
+							##Transformations
+
+							* can be composed
+
+							* Each stepper only deals with its own values
+
+							* Intermediate steppers don't create intermediate collections (Lodash do)
+
+							* only final transformer build full result
+
+							* Supports async (push x pull)
+						</script>
+					</section>
+					<section>
+						<pre>
+							<code data-trim>
+//Transducer: map
+map = function(f) {
+	//returns the transducer...
+	return function(xf) {
+		//the transducer builds a transformer..
+		return transformer (
+			//init:
+			function() {
+				return xf.init();
+			},
+			//step:
+				function(result, item) {
+				var mapped = f(item);
+				return xf.step(result, mapped);
+			},
+			//result:
+			function(result) {
+				return xf.result(result);
+			}
+		);
+	}
+};
+
+input = [2,3,4];
+output = transduce(map(plus1), append, [], input);
+// [3,4,5] (=[2+1, 3+1, 4+1])
+output = transduce(map(plus1), sum, 0, input);
+//12 = (= 0 + 2+1 + 3+1 + 4+1)
+							</code>
+						</pre>
+					</section>
+					<section data-markdown>
+						<script type="text/template">
+							##Transducers
+
+							* Async support, don't care about sequence, composable
+
+							* Combine libraries in app
+
+							* Used with promises (every step = next promise )
+
+							* Modern libraries starts to support them
+
+							* Supports async (push x pull)
+						</script>
+					</section>
+				</section>
+
+
 				<section>
 					<img src="imgs/end.jpg" alt="end">
 				</section>
