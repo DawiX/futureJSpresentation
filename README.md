@@ -7,14 +7,11 @@ Install dependencies
 
 
 ```
-#!python
 npm install
 ```
 
 Start the presentation
 
 ```
-#!python
-
 grunt serve
 ```
